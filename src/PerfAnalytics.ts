@@ -14,22 +14,32 @@ export default class PerfAnalytics {
   }
 
   private static makeMeasurements(): IResultsOfAllMeasurements {
-    const measurementSource: IMeasurementSource = new MeasurementSource();
+    const source: IMeasurementSource = new MeasurementSource();
 
     return {
-      firstContentfulPaint: FirstContentfulPaintMeasurement.measures(measurementSource),
-      timeToFirstByte: TimeToFirstByteMeasurement.measures(measurementSource),
-      windowLoad: WindowsLoadMeasurement.measures(measurementSource),
-      domLoad: DomLoadMeasurement.measures(measurementSource),
-      resourceLoads: ResourceLoadsMeasurement.measures(measurementSource),
+      firstContentfulPaint: FirstContentfulPaintMeasurement.measures(source),
+      timeToFirstByte: TimeToFirstByteMeasurement.measures(source),
+      windowLoad: WindowsLoadMeasurement.measures(source),
+      domLoad: DomLoadMeasurement.measures(source),
+      resourceLoads: ResourceLoadsMeasurement.measures(source),
     };
   }
 
-  private static sendMeasurements(result: IResultsOfAllMeasurements, environment: IEnvironment):void {
-    // HERE
-    // TODO : API hazırlandığı zaman bağlantı yapılacak.
-
-    console.log('result : ', result);
-    console.log('environment: ', environment);
+  private static async sendMeasurements(result: IResultsOfAllMeasurements, environment: IEnvironment):Promise<void> {
+    await fetch(`http://${environment.host}:${environment.port}/measurements`,{
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        origin,
+        url: document.URL,
+        domLoad: result.domLoad.time,
+        windowLoad: result.windowLoad.time,
+        firstContentfulPaint: result.firstContentfulPaint.time,
+        timeToFirstByte: result.timeToFirstByte.time,
+        resourceLoads: result.resourceLoads
+      })
+    });
   }
 }
