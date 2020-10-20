@@ -4,7 +4,13 @@ const TerserPlugin = require('terser-webpack-plugin');
 module.exports = {
   devServer: {
     proxy: {
-      '/measurements': 'http://localhost:3000'
+      '/measurements': {
+        target: 'https://perfanalytics-api-butguc.herokuapp.com',
+        secure: false,
+        changeOrigin: true,
+        logLevel: 'debug',
+        pathRewrite: {'^/measurements' : '/measurements'}
+      }
     }
   },
   entry: './src/index.ts',
